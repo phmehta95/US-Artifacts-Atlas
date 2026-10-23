@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#005eb8">
+    <meta name="description" content="An educational ultrasound artefact image atlas from the NHS Clinical Physics team at Barts Health NHS Trust.">
+    <title>Ultrasound Artefact Atlas | Barts Health NHS Trust</title>
+    <?!= include("Styles"); ?>
+    <script><?!= include("Client"); ?></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <header>
+      <div class="nhs-header">
+        <a class="nhs-brand" href="#" aria-label="Barts Health NHS Trust Ultrasound Physics home">
+          <img
+              class="nhs-logo"
+              src="assets/nhs_logo.svg"
+              alt="NHS logo"
+            >
+          <span class="brand-name">Barts Health NHS Trust <span>Ultrasound Physics</span></span>
+        </a>
+        <span class="header-note">Learning resource</span>
+      </div>
+      <div class="header-rule"></div>
+    </header>
+
+    <main id="main-content">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="#main-content">Home</a>
+        <span aria-hidden="true">›</span>
+        <span>Ultrasound artefact atlas</span>
+      </nav>
+
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">Barts Health NHS Trust · Ultrasound Physics</p>
+        <h1 id="page-title">Ultrasound Artefact Atlas</h1>
+        <p class="lead">Explore common ultrasound image artefacts, understand why they appear and learn how to identify them.</p>
+      </section>
+
+      <section class="search-panel" aria-labelledby="search-heading">
+        <h2 id="search-heading">Find an artefact</h2>
+        <label for="artifact-search">Search by keyword related to any physics or image aspect</label>
+        <div class="search-field">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <circle cx="10.8" cy="10.8" r="6.8"></circle>
+            <path d="m16 16 5 5"></path>
+          </svg>
+          <input id="artifact-search" type="search" autocomplete="off" placeholder="For example, repeated lines or colour outside a vessel">
+          <button id="clear-search" class="clear-search" type="button" hidden>Clear</button>
+        </div>
+        <p class="search-hint" id="search-hint">Search results appear below. Choose a result to view its details.</p>
+        <div id="search-results" class="search-results" aria-live="polite" hidden></div>
+      </section>
+
+      <section class="explorer" aria-labelledby="explorer-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Browse the atlas</p>
+            <h2 id="explorer-heading">Choose an artefact</h2>
+          </div>
+          <span class="atlas-count" id="atlas-count"></span>
+        </div>
+
+        <div class="selectors">
+          <div class="select-field">
+            <label for="category-select">1. Artefact group</label>
+            <select id="category-select"></select>
+          </div>
+          <div class="select-field">
+            <label for="artifact-select">2. Example</label>
+            <select id="artifact-select"></select>
+          </div>
+        </div>
+
+        <div id="artifact-details" class="artifact-details" aria-live="polite"></div>
+      </section>
+
+      <aside class="education-note">
+        <span class="note-icon" aria-hidden="true">i</span>
+        <p><strong>Educational resource</strong> Artefacts can be useful clues, but images should always be interpreted in clinical context and alongside the full examination. Follow local protocols and seek advice when findings are uncertain.</p>
+      </aside>
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <div>
+          <strong>Barts Health NHS Trust</strong>
+          <p>Ultrasound Physics · Learning resource</p>
+        </div>
+        <p>This atlas is for informative purposes only. It is not meant to replace local site guidelines.</p>
+      </div>
+    </footer>
+  </body>
+</html>
