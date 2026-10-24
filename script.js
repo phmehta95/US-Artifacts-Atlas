@@ -1,6 +1,6 @@
 const categories = [
-  { id: "acoustic", label: "Acoustic artefacts" },
-  { id: "doppler", label: "Doppler artefacts" },
+  { id: "acoustic", label: "Acoustic artifacts" },
+  { id: "doppler", label: "Doppler artifacts" },
   { id: "transducer", label: "Transducer faults" },
   { id: "system", label: "System faults" },
   { id: "miscellaneous", label: "Miscellaneous" }
