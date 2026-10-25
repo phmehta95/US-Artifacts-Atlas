@@ -12,7 +12,7 @@ const artifacts = [
     category: "acoustic",
     name: "Reverberation",
     what: "Occurs when the ultrasound beam reflects back and forth between reflectors.",
-    physics: "The ultrasound pulse bounces back and forth between two highly reflective surfaces - this equal time interval results in a series of equally spaced echoes. Reverberation artifacts are common in areas where sound waves encounter multiple layers of tissue or air, for example, when imaging lung tissue. Reducing the overall gain or decreasing the near field time-gain compensation can dim the false repetitive echoes.",
+    physics: "The ultrasound pulse bounces back and forth between two highly reflective surfaces - this equal time interval results in a series of equally spaced echoes. Reverberation artifacts are common in areas where sound waves encounter multiple layers of tissue or air, for example, when imaging lung tissue.<br> Reverberation can also occur when the beam reflects off a very reflective surface and the transducer face itself, producing a series of echoes which manifest as bright, equally spaced lines.",
     reduce: ["Reduce the overall gain", "Reduce near field time-gain compensation", "Turn on harmonic imaging"],
     spotting: ["Repeated parallel lines with equal spacing.", "Echoes that fade with depth.", "When changing the probe angle, the pattern may shift or disappear."],
     keywords: "repeated lines parallel echoes comet tail ring down"
