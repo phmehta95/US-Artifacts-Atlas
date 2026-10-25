@@ -13,7 +13,7 @@ const artifacts = [
     name: "Reverberation",
     what: "Occurs when the ultrasound beam reflects back and forth between reflectors.",
     physics: "The ultrasound pulse bounces back and forth between two highly reflective surfaces - this equal time interval results in a series of equally spaced echoes. Reverberation artifacts are common in areas where sound waves encounter multiple layers of tissue or air, for example, when imaging lung tissue. Reducing the overall gain or decreasing the near field time-gain compensation can dim the false repetitive echoes.",
-    reduce: ["Reduce the overall gain", "Reduce near field time-gain compensation", "Turn on harmonic imaging"]
+    reduce: ["Reduce the overall gain", "Reduce near field time-gain compensation", "Turn on harmonic imaging"],
     spotting: ["Repeated parallel lines with equal spacing.", "Echoes that fade with depth.", "When changing the probe angle, the pattern may shift or disappear."],
     keywords: "repeated lines parallel echoes comet tail ring down"
   },
@@ -319,10 +319,9 @@ function renderArtifact() {
         <h4 id="spot-heading">Quick ways to spot it</h4>
         <ul>${artifact.spotting.map((point) => `<li>${point}</li>`).join("")}</ul>
       </section>
-      </section>
-      <section class="detail-card spotting-card" aria-labelledby="spot-heading">
-        <h4 id="spot-heading">Ways to reduce it</h4>
-        <ul>${artifact.spotting.map((point) => `<li>${point}</li>`).join("")}</ul>
+      <section class="detail-card reduce-card" aria-labelledby="reduce-heading">
+        <h4 id="reduce-heading">Ways to reduce it</h4>
+        <ul>${(artifact.reduce ?? []).map((point) => `<li>${point}</li>`).join("")}</ul>
       </section>
       <section id="artifact-image-gallery" class="image-gallery" aria-labelledby="gallery-heading" hidden>
         <h4 id="gallery-heading">Example image gallery</h4>
