@@ -11,9 +11,9 @@ const artifacts = [
     id: "reverberation",
     category: "acoustic",
     name: "Reverberation",
-    what: "A series of equally spaced, progressively weaker echoes appearing deep to a strong reflector.",
-    physics: "The sound pulse travels repeatedly between two strong, nearly parallel reflectors. The scanner assumes each returning echo made a single round trip, so each repeat is placed progressively deeper. The spacing reflects the distance between the reflectors.",
-    spotting: ["Look for repeated, parallel lines at regular intervals.", "The echoes often fade with depth.", "Change the probe angle or position; the pattern may shift or disappear."],
+    what: "Occurs when the ultrasound beam reflects between reflectors",
+    physics: "The ultrasound pulse bounces back and forth between two highly reflected interfaces - this equal time interval results in a series of equally spaced echoes.",
+    spotting: ["Repeated parallel lines.", "Echoes that fade with depth.", "When changing the probe angle, the pattern may shift or disappear."],
     keywords: "repeated lines parallel echoes comet tail ring down"
   },
   {
