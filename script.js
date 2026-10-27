@@ -21,17 +21,19 @@ const artifacts = [
     id: "posterior-enhancement",
     category: "acoustic",
     name: "Posterior acoustic enhancement",
-    what: "Increased echo brightness deep to a structure that transmits sound well, often a fluid-filled structure.",
-    physics: "Attenuation through the low-loss structure is less than the scanner expects for the same depth. The returning echoes from tissues behind it are therefore relatively strong and displayed brighter.",
-    spotting: ["Look for a brighter band deep to a cyst or other fluid-filled structure.", "Compare the region behind the structure with tissue at a similar depth beside it.", "Check that the finding persists in more than one view."],
-    keywords: "bright behind cyst fluid increased transmission"
+    what: "Structures that transmit sound very well produce brighter echoes.",
+    physics: "For e.g: fluid filled structures, the attenuation coefficient will be much less than that of surrounding soft tissue. The time gain compensation will then overcompensate through this fluid-filled structure causing deeper tissues to be brighter.<br> These shadow artifact can be categorised into clean and dirty - with clean shadow manifesting as sharp, completely dark columns with distinct edges. Dirty shadows are hazier and grayer, containing reverberation lines due to scattered ultrasound waves. ",
+    reduce: ["Adjust time gain compensation," , "Turn on spatial compounding to direct the sound waves from different angles", "Reduce overall 2D gain and increase the dynamic range to soften contrast between normal tissue and the enhanced area"  ],
+    spotting: ["Look for brighter regions posterior to the fluid-filled/cystic area.", "Compare the region behind the structure with tissue at a similar depth beside it.", "Check that the finding persists in more than one view."],
+    keywords: "bright posterior cyst fluid increased echogenicity"
   },
   {
     id: "shadowing",
     category: "acoustic",
     name: "Acoustic shadowing",
-    what: "A dark or echo-poor region deep to a strongly attenuating or reflecting structure.",
-    physics: "A structure such as a calcification or gas interface reflects or attenuates much of the incident sound. Less sound reaches the tissues behind it, so fewer returning echoes are available to form the image.",
+    what: "Structures which are highly attenuating produce dark regions (shadows) behind the structure.",
+    physics: "Due to sound waves being very heavily absorbed by these structures, there is a reduction in signal behind the structure.",
+    reduce: ["Change the scan plane so the beam angle bypasses the strongly attenuating structure", "Turn on spatial compounding to direct the sound waves from different angles", "Optimise time gain compensation" ],
     spotting: ["Look for a dark band extending deep to a bright reflector.", "The shadow may be clean and sharply defined or diffuse.", "Alter the insonation angle to see whether the shadow changes."],
     keywords: "dark behind stone calcification gas shadow"
   },
@@ -39,18 +41,21 @@ const artifacts = [
     id: "mirror-image",
     category: "acoustic",
     name: "Mirror image",
-    what: "A duplicated structure displayed on the far side of a strong, smooth reflector, commonly the diaphragm.",
-    physics: "The pulse reflects off a strong interface, travels to the structure and back, then reflects again before returning to the probe. The scanner assumes a direct path and places the echo deeper than its true location.",
-    spotting: ["Look for a duplicate structure across a strong reflector.", "The apparent copy is often deeper and may be less clear.", "Check whether the supposed structure lies in a plausible anatomical location."],
-    keywords: "duplicate diaphragm liver image reflected"
+    what: "When a highly reflective surface in the path of the primary beam creates a mirror image of an object",
+    physics: "Mirror image artifacts occur when the transmitted pulse reflects off a highly reflective surface and changes direction before its return to the transducer. Because of the increased length of the ultrasound pulse journey, the ultrasound scanner misjudges the distance to the object and produces a duplicate image of the object past the reflective boundary.<br> Mirror image artifacts are often deemed 'friendly' or helpful artifacts for certain clinical scenarios, for example, when excluding pleural effusion.",
+    reduce: ["Alter the angle of insonation - tilt or rotate the probe to change the angle of the beam relative to the reflective surface.", "Modify gain/TGC if the duplicate image is caused by excessive brightness", "Modify focal zone and scan depth to minimise likelihood of multiple unwanted reflections" ]
+    spotting: ["Look for a duplication of a structure across a reflector in the image.", "The reflected image will be appear deeper within the body", "Check whether the structure which is reflected has a plausible anatomical location."]
+    keywords: "duplicate diaphragm liver image reflected pleural effusion reflector "
   },
   {
     id: "refraction",
     category: "acoustic",
     name: "Refraction and edge shadowing",
-    what: "A structure may appear displaced or duplicated, with a narrow shadow at the edge of a curved object.",
-    physics: "When sound crosses an interface obliquely between tissues with different sound speeds, it bends. The scanner assumes a straight path, so echoes can be mapped to the wrong lateral position; edge shadowing can occur when the beam bends away from the transducer.",
-    spotting: ["Look for a narrow dark band at the edge of a rounded structure.", "A nearby structure may appear laterally displaced or duplicated.", "Change the probe angle and compare another view."],
+    what: "Occurs when an ultrasound pulse hits an interface at a non-perpendicular angle, causing refraction, bending the beam from its original path.",
+    physics: "Refraction occurs fur to the ultrasound beam having different speeds of beam propagation within different tissues. Scanners assume that reflected echoes will come from the a source directly in line with the transmitted sound pulse, however echoes generated from a refracted beam will be misplaced in the image.",
+    reduce:["Rotate the angle of the probe so the ultrasound beam strikes the tissue boundary at a 90 degree angle",
+    "Enable spatial compounding, as capturing frames from multiple angles will reduce refraction of the beam"]
+    spotting: ["Look for duplication of a structure side-by-side", "A dark band which shows up at the edge of curved surfaces such as blood vessels or cysts."],
     keywords: "edge shadow lateral displacement bending curved refraction"
   },
   {
