@@ -43,7 +43,7 @@ const artifacts = [
     name: "Mirror image",
     what: "When a highly reflective surface in the path of the primary beam creates a mirror image of an object",
     physics: "Mirror image artifacts occur when the transmitted pulse reflects off a highly reflective surface and changes direction before its return to the transducer. Because of the increased length of the ultrasound pulse journey, the ultrasound scanner misjudges the distance to the object and produces a duplicate image of the object past the reflective boundary.<br> Mirror image artifacts are often deemed 'friendly' or helpful artifacts for certain clinical scenarios, for example, when excluding pleural effusion.",
-    reduce: ["Alter the angle of insonation - tilt or rotate the probe to change the angle of the beam relative to the reflective surface.", "Modify gain/TGC if the duplicate image is caused by excessive brightness", "Modify focal zone and scan depth to minimise likelihood of multiple unwanted reflections" ]
+    reduce: ["Alter the angle of insonation - tilt or rotate the probe to change the angle of the beam relative to the reflective surface.", "Modify gain/TGC if the duplicate image is caused by excessive brightness", "Modify focal zone and scan depth to minimise likelihood of multiple unwanted reflections" ],
     spotting: ["Look for a duplication of a structure across a reflector in the image.", "The reflected image will be appear deeper within the body", "Check whether the structure which is reflected has a plausible anatomical location."]
     keywords: "duplicate diaphragm liver image reflected pleural effusion reflector "
   },
@@ -54,7 +54,7 @@ const artifacts = [
     what: "Occurs when an ultrasound pulse hits an interface at a non-perpendicular angle, causing refraction, bending the beam from its original path.",
     physics: "Refraction occurs fur to the ultrasound beam having different speeds of beam propagation within different tissues. Scanners assume that reflected echoes will come from the a source directly in line with the transmitted sound pulse, however echoes generated from a refracted beam will be misplaced in the image.",
     reduce:["Rotate the angle of the probe so the ultrasound beam strikes the tissue boundary at a 90 degree angle",
-    "Enable spatial compounding, as capturing frames from multiple angles will reduce refraction of the beam"]
+    "Enable spatial compounding, as capturing frames from multiple angles will reduce refraction of the beam"],
     spotting: ["Look for duplication of a structure side-by-side", "A dark band which shows up at the edge of curved surfaces such as blood vessels or cysts."],
     keywords: "edge shadow lateral displacement bending curved refraction"
   },
