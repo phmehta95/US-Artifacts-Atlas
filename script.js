@@ -56,15 +56,15 @@ const artifacts = [
     reduce:["Rotate the angle of the probe so the ultrasound beam strikes the tissue boundary at a 90 degree angle",
     "Enable spatial compounding, as capturing frames from multiple angles will reduce refraction of the beam"],
     spotting: ["Look for duplication of a structure side-by-side", "A dark band which shows up at the edge of curved surfaces such as blood vessels or cysts."],
-    keywords: "edge shadow lateral displacement bending curved refraction"
+    keywords: "edge shadow lateral displacement bending curved refraction refracted"
   },
   {
     id: "anisotropy",
     category: "acoustic",
     name: "Anisotropy",
-    what: "A real structure, particularly a tendon, appears artificially dark when the beam is not perpendicular to its fibres.",
-    physics: "Specular reflectors send most of their echo back toward the probe only when insonated close to perpendicular. When the beam is angled, the reflected energy travels away from the transducer and the structure appears hypoechoic.",
-    spotting: ["Look for a tendon that appears focally darker than expected.", "Tilt or heel-toe the probe to make the beam perpendicular.", "A normal tendon should regain its fibrillar brightness when aligned."],
+    what: "Darkening which occurs due to tissues reflecting sound waves back to the transducer based on the angle of incidence of the ultrasound pulses.",
+    physics: " The proportion of the ultrasound beam reflected back to the transducer isfrom being perpendicular, the visibility of the region being imaged decreases.",
+  spotting: ["Look for reduction in the brightness of structures", "Could be an anisotropy artifact if tilting or rocking (heel-toe maneuver) the probe resolves this issue.", "Especially common when imaging musculoskeletal tissue."],
     keywords: "tendon dark angle probe tilt heel toe perpendicular"
   },
   {
