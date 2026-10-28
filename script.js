@@ -63,7 +63,9 @@ const artifacts = [
     category: "acoustic",
     name: "Anisotropy",
     what: "Darkening which occurs due to tissues reflecting sound waves back to the transducer based on the angle of incidence of the ultrasound pulses.",
-    physics: " The proportion of the ultrasound beam reflected back to the transducer isfrom being perpendicular, the visibility of the region being imaged decreases.",
+    physics: " A high proportion of the ultrasound beam reflected back to the transducer is dependent on the probe being perpendicular - as the probe angle varies from 90 degree, the visibility of the region being imaged decreases.",
+    reduce:["Rotate the angle of the probe so the ultrasound beam strikes the tissue boundary at a 90 degree angle",
+    "Enable spatial compounding, as capturing frames from multiple angles will reduce refraction of the beam"],
   spotting: ["Look for reduction in the brightness of structures", "Could be an anisotropy artifact if tilting or rocking (heel-toe maneuver) the probe resolves this issue.", "Especially common when imaging musculoskeletal tissue."],
     keywords: "tendon dark angle probe tilt heel toe perpendicular"
   },
@@ -115,47 +117,54 @@ const artifacts = [
   {
     id: "dead-element",
     category: "transducer",
-    name: "Dead or weak element",
-    what: "One or more transducer elements produce little or no signal, creating a persistent line or band in the image.",
-    physics: "An element that cannot transmit, receive or is poorly coupled contributes reduced echo information along its beam line. The exact appearance depends on the probe design and system processing.",
-    spotting: ["Look for a persistent vertical line or band at the same screen position.", "Check whether it remains when the probe is moved to a different part of the patient.", "Inspect the probe and arrange a probe test or service check; do not rely on the affected image."],
-    keywords: "vertical line band missing element probe transducer"
+    name: "Element dropout",
+    what: "A vertical dark line which indicates a weak or failed piezoelectric element in the transducer",
+    physics:"Element dropout can occur due to the cracking of the acoustic array inside the transducer head, damage to the lens or lens housing, including cracks or wear in the probe lens which allows fluid to enter, or aging electronics or old piezoelectric crystals.",
+    reduce:["Do not continue using probe if there is significant dropout, it must be taken out of service and swapped for a working transducer"],
+    spotting: ["Look for a vertical line or band on screen which remains regardless of probe position.", "Faint lines correspond to weak piezoelectric elements, dark lines mean dead elements", "Dragging a metal paper clip across the lens surface allows for identification of any breaks or gaps in the the bright reflection line which will move across the screen (paper-clip test)."],
+    keywords: "vertical line band missing element probe transducer paperclip dark dead weak"
   },
   {
-    id: "lens-damage",
+    id: "delamination",
     category: "transducer",
-    name: "Lens damage or delamination",
-    what: "Damage or separation in the probe lens can cause local image dropout, distortion or inconsistent coupling.",
-    physics: "The lens helps focus and couple sound into tissue. Cracks, delamination or material damage can disrupt transmission and reception, producing a localised or broad image abnormality.",
-    spotting: ["Inspect the lens for cracks, bubbles, peeling or unusual wear.", "Look for a repeatable near-field dropout or distortion.", "Remove a damaged probe from use and follow local equipment reporting procedures."],
+    name: "Delamination",
+    what: "The separation of layers within the head of the ultrasound transducer, which makes the on-screen reverberation lines appear wavy or curved.",
+    physics:"When the layers within the head of the transducer separate, a small gap filled with air is created, inducing an acoustic impedance mismatch causing the speed of sound to slow down. The scanner assumes this area is deeper than it actually is, causing the flat layers to appear warped.",
+    reduce:["To reduce and prevent delamination of an ultrasound probe lens, follow manufacturer guidelines regarding cleaning and disinfection to avoid over-soaking and chemical degradation", "Avoid excessive mechanical stress", "If significant delamination is visible in the image or on the probe, the probe must be pulled from clinical service and sent to be repaired or replaced."],
+    spotting: ["Look for nonuniformity of the reverberation lines", "Delamination will cause shadowing downstream of the reverberation region.","Delaminated probes also may have raised spots on the lens sense - but sometimes no physical damage is visible, especially in the early stages."],
     keywords: "cracked peeling lens delamination damaged probe dropout"
   },
   {
     id: "cable-intermittent",
     category: "transducer",
     name: "Intermittent cable or connector fault",
-    what: "The image may flicker, drop out or show intermittent lines when the cable or connector connection is unstable.",
-    physics: "A damaged conductor, shielding or connector can interrupt element signals or introduce electrical noise. The resulting artefact may change as the cable position changes.",
-    spotting: ["Look for intermittent image loss, flicker or noise.", "Note whether it changes with normal cable movement; do not pull, twist or stress the cable to test it.", "Stop using a suspect probe and report it for inspection."],
-    keywords: "flicker cable connector intermittent noise"
+    what: "Internal wire damage in the probe's wiring harness causes flaws in the image.",
+    physics: "Worn wires make and break contact with each other causing unwanted and unexpected electronic information to be displayed. Incorrect mapping can occur between the piezoelectric crystals and corresponding section on the monitor - if connector pins are bent or broken, a permanent dead zone can be present. In B-mode, the image can flash or drop out when the cable is moved or twisted.In Doppler mode, artifacts can look like unwanted colour flashes or vertical streaks.",
+    reduce:["Avoid acute bending of the cable and prevent the ultrasound scanner cart wheels from trampling the cables", "Ensure connecter locking the probe to the system is properly engaged and eck the connector pins prior to insertion", "If cable or connector fault is identified, stop using the probe and repair/replace it"],
+    spotting: ["Look for intermittent image loss or noise, or image flickering", "Check whether it occurs/shifts upon changing cable position - do not purposefully twist or strain the cable when checking", "Also gently flex the strain relief to check for visual changes - again, do not flex the strain relied excessively  "],
+    keywords: "flicker cable connector intermittent noise wiring wire strain relief colour"
   },
   {
     id: "probe-noise",
     category: "transducer",
     name: "Electrical interference",
-    what: "Unwanted lines, bands or noise appear in the image because electrical interference is affecting the probe signal.",
-    physics: "Electromagnetic interference or a shielding/grounding problem can be coupled into the receive path and displayed as structured or random noise.",
-    spotting: ["Look for noise that persists in a fluid or no-echo region.", "Check whether it affects more than one probe or system, without compromising patient care.", "Follow local equipment checks and report persistent interference to the appropriate team."],
-    keywords: "electrical noise interference bands probe"
+    what: "Noise or unwanted lines/bands appear in the image due to electrical interference affecting the probe signal.",
+    physics: "If the electrical outlet the scanner is plugged into has poor grounding, that noise overrides the cable shielding and shows up on the scanner. Any microscopic break in the cable shielding can allow noise to leak through, or if there is improper scanner grounding. External electronic devices which produce electromagnetic or radiofrequency waves which can be conducted towards internal circuitry, inducing further noise.",
+    reduce:["Move the ultrasound prove away from devices which could produce electromagnetic or radiofrequency interference",
+    "Ensure noise-reduction filters, such as Speckle Reduction Imaging is turned on in the system presets", "If the noise has been isolated to the probe, it must be removed from clinical service and be repaired/replaced."],
+    spotting: ["Look fuzzy, grainy haze across the image or horizontal/diagonal bands that move across the screen.", "If the ultrasound cart is moved and the artifact disappears, its a sign that it is interference localised to a specific area."],
+    keywords: "electrical noise interference bands probe electromagnetic radiofrequency fuzzy grainy speckle cable"
   },
   {
     id: "range-ambiguity",
     category: "system",
     name: "Range ambiguity",
-    what: "An echo from a previous pulse is displayed at the wrong depth because the next pulse was transmitted before that echo returned.",
-    physics: "At high pulse repetition frequencies or great imaging depths, a late echo from one pulse can arrive after another pulse has been sent. The scanner may assign it to the newer pulse and place it at an incorrect, usually shallower, depth.",
-    spotting: ["Look for an implausible echo or structure at a fixed depth.", "The feature may change when imaging depth or pulse repetition frequency changes.", "Compare with another view and check whether the finding makes anatomical sense."],
-    keywords: "wrong depth late echo pulse repetition frequency prf"
+    what: "The ultrasound image shows a deep organ/structure much closer to the surface than it actually is.",
+    physics: "Caused by a too high pulse repetition frequency so an echo from a deeper structure arrives after the next pulse has already been transmitted.",
+    reduce:["Move the ultrasound prove away from devices which could produce electromagnetic or radiofrequency interference",
+    "Ensure noise-reduction filters, such as Speckle Reduction Imaging is turned on in the system presets", "If the noise has been isolated to the probe, it must be removed from clinical service and be repaired/replaced."],
+    spotting: ["Look for an organ appearing implausibly shallow in the body", "Structures appear to lack proper borders", "In Doppler imaging, what should be e.g. a deep blood vessel appears to be very close to the surface"],
+    keywords: "wrong depth late echo pulse repetition frequency prf noisy cloudy shallow vessel bladder superficial"
   },
   {
     id: "side-lobes",
