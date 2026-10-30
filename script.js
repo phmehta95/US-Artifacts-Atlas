@@ -170,46 +170,51 @@ const artifacts = [
     id: "side-lobes",
     category: "system",
     name: "Side-lobe artefact",
-    what: "A strong reflector outside the main beam is displayed as if it were inside the image beam.",
-    physics: "A real transducer beam can contain weaker off-axis side lobes. If a side lobe strikes a strong reflector, its echo may be received and mapped along the main beam path at the wrong position.",
-    spotting: ["Look for echoes within a fluid-filled region that should be echo-free.", "The false echo may align with a strong reflector outside the region.", "Change the probe angle or position and check whether the echo moves or disappears."],
-    keywords: "false echoes fluid cyst off axis side lobe"
+    what: "When the side axis beams (side-lobes) of an ultrasound beam reflect from a strong reflector outside the main beam axis.",
+    physics: "The piezoelectric crystals in the transducer expand and contract to produce ultrasound beams on-axis, but due to expansion and contraction also occurring radially, side-lobe beams are produced. These reflect off off-axis boundaries and display echoes with false positioning.",
+    reduce:["Switch to harmonic imaging - not using the fundamental frequencies reduces the divergence of the beam, reducing side-lobe production  ","Turn on Speckle Reduction Imaging to reduce noise ", "Increasing the number of focal zones - this narrows the beam at multiple depths"],
+    spotting: ["Look for bright curvilinear lines or spots within structures that should be dark (anechoic) due to being  .", "The false echo may align with a strong reflector outside the region.", "Change the probe angle or position and check whether the echo moves or disappears."],
+    keywords: "false echoes fluid cyst off axis side lobe divergence reflector"
   },
   {
     id: "grating-lobes",
     category: "system",
     name: "Grating-lobe artefact",
-    what: "An off-axis echo is displayed within the main image beam, often as a false echo in a fluid-filled structure.",
-    physics: "Array elements spaced too widely relative to the wavelength can produce strong grating lobes. Echoes from these off-axis beams are incorrectly assigned to the main beam direction.",
-    spotting: ["Look for unexplained echoes within an otherwise simple fluid space.", "The appearance can vary with probe angle, frequency or probe type.", "Compare another view and check whether the apparent structure can be reproduced."],
+    what: "Off-axis ultrasonic beams produced by transducer element array spacing",
+    physics: "If the distance between individual piezoelectric crystal elements (pitch) is equal to or greater than the wavelength of the ultrasound wave, the transducer undersamples the wavefront and the system can no longer distinguish between a wave returning from the centre one returning from a side angle.",
+    reduce:["Switch to harmonic imaging - grating lobes do not have energy to produce harmonic frequencies, reducing these artifacts", "Adjust the focal zone to direct at or below the structure being imaged, minimising energy spread at this depth","Decrease time gain compensation at the depth of the structure being imaged"],
+    spotting: ["Look for echoes within natural dark anechoic structures (for example, bladder or large cysts)]", "Moving the patient will not move the grating lobe artifact - it will stay fixed in the exact same spot on the screen.", "Rotating the probe will rapidly change the shape of the artifact if it is a true grating lobe artifact."],
     keywords: "array off-axis false echoes fluid grating lobes"
   },
   {
     id: "clutter",
     category: "system",
     name: "Clutter",
-    what: "Low-level unwanted echoes, often near the transducer, reduce the visibility of genuine structures.",
-    physics: "Clutter can arise from reverberation, tissue motion, phase aberration or other unwanted signals. The scanner's filtering and processing may not fully separate these from useful echoes.",
-    spotting: ["Look for haze or diffuse echoes that obscure anatomy, often in the near field.", "Check whether it changes with probe pressure, angle or patient motion.", "Optimise the image settings and compare with another acoustic window."],
-    keywords: "haze near field diffuse echoes noise"
+    what: "Unwanted echoes in the near-field region which reduce the visibility of actual tissue and anatomical structures.",
+    physics: "Caused by motion from heart walls, vessels walls or the respiratory system which produce signals that can contaminate blood flow data - can also be caused by reverberations from the chest wall or rib/lung interface",
+    reduce:["Enable harmonic imaging to remove clutter from side-lobes", "Change transducer angle and position to avoid reflection from moving structures", "Adjust pulse repetition frequency to remove the background haze and adjust number and position of focal zones"],
+    spotting: ["Look for a hazy region close to the transducer", "True clutter artifacts vanish as the beam angle is altered."],
+    keywords: "haze clutter motion noise transducer reverberation motion vibration"
   },
   {
     id: "persistence",
     category: "system",
     name: "Temporal persistence",
-    what: "A moving structure or transient signal appears smeared or lingers across successive frames.",
-    physics: "The system averages information from multiple frames to reduce speckle and noise. This temporal smoothing can leave a trail when anatomy or flow moves between frames.",
-    spotting: ["Look for a trailing or smeared edge behind moving structures.", "The effect is more noticeable with rapid motion or a high persistence setting.", "Reduce persistence or increase frame rate when motion detail is important."],
-    keywords: "smoothing smear trailing frames motion"
+    what: "Motion blur that occurs when the temporal persistence setting is set too high",
+    physics: "Temporal persistence is a feature which updates and averages consecutive ultrasound frames to reduce noise and speckle. However increasing the persistence setting too high it will produce a laggy, motion-blurred appearance.",
+    reduce:["Decrease any persistence/frame-averaging settings", "Use low or zero persistence for fast-moving structures and higher for slow-moving to reduce background and speckle noise", "Can improve real-time temporal resolution by narrowing field of view or reducing image depth"],
+    spotting: ["Look for structures usually fast moving, such as rapidly beating heart valves and vessel walls appearing sluggish or with residual ghosting", "In colour doppler mode high persistence setting makes old flow velocities merge with current ones causing the colour signals to mix into each other", "Look for reduced temporal resolution - laggy, stuttering images which look choppy."],
+    keywords: "smoothing smear trailing frames motion laggy stutter slow "
   },
   {
     id: "speckle",
     category: "miscellaneous",
     name: "Speckle",
-    what: "A granular pattern of bright and dark echoes appears within tissue that is made up of many small scatterers.",
-    physics: "Echoes from scatterers smaller than the wavelength interfere constructively and destructively. Their combined signal creates a granular pattern that is characteristic of coherent ultrasound imaging.",
-    spotting: ["Look for a fine grain-like texture within soft tissue.", "Speckle changes with probe position and insonation angle.", "Do not mistake speckle alone for discrete anatomy; correlate across views and with other findings."],
-    keywords: "grain granular texture interference tissue"
+    what: "Grainy, 'salt-and-pepper' appearance due to the constructive and destructive interference of the ultrasound waves",
+    physics: "When transmitted and received ultrasound waves bounce off of very very small structures inside tissues and overlap causing bright (constructive) and dark (destructive) spots.",
+    reduce:["Turn on the Speckle Reduction Imaging (SRI) setting - this is a post processing filter which identifies regions of smooth tissue and applies a smoothing algorithm", "Turn on spatial compounding - steering an ultrasound beam from multiple angles instead of one cancels out speckle noise", "Turning on tissue harmonic imaging selects for higher frequency echoes which produces a crisper image and reduces speckle."],
+    spotting: ["Look for a granular uniform static made of bright and dark dots inside what should a region of smooth tissue", "Changing the position or angle of the probe will move the artifact", "Can be differentiated from electronic/thermal noise due to being blended into tissue, whereas electronic/thermal noise will cause whole-screen static."],
+    keywords: "grain granular texture interference tissue speckle salt pepper grainy static noise"
   },
   {
     id: "probe-pressure",
