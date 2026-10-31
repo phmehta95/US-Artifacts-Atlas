@@ -66,17 +66,19 @@ const artifacts = [
     physics: " A high proportion of the ultrasound beam reflected back to the transducer is dependent on the probe being perpendicular - as the probe angle varies from 90 degree, the visibility of the region being imaged decreases.",
     reduce:["Rotate the angle of the probe so the ultrasound beam strikes the tissue boundary at a 90 degree angle",
     "Enable spatial compounding, as capturing frames from multiple angles will reduce refraction of the beam"],
-  spotting: ["Look for reduction in the brightness of structures", "Could be an anisotropy artifact if tilting or rocking (heel-toe maneuver) the probe resolves this issue.", "Especially common when imaging musculoskeletal tissue."],
+    spotting: ["Look for reduction in the brightness of structures", "Could be an anisotropy artifact if tilting or rocking (heel-toe maneuver) the probe resolves this issue.", "Especially common when imaging musculoskeletal tissue."],
     keywords: "tendon dark angle probe tilt heel toe perpendicular"
   },
   {
     id: "aliasing",
     category: "doppler",
     name: "Aliasing",
-    what: "A Doppler display wraps around when the measured velocity exceeds the system's sampling limit.",
-    physics: "Pulsed Doppler samples returning echoes at a finite pulse repetition frequency. By the Nyquist limit, the maximum unambiguous Doppler shift is half that frequency. Larger shifts are displayed with the wrong direction or wrapped to the opposite side of the scale.",
-    spotting: ["On colour Doppler, look for abrupt colour reversal within a vessel.", "On a spectrum, look for the waveform wrapping past the scale boundary.", "Increase the scale or pulse repetition frequency, or use a lower transmit frequency where appropriate."],
-    keywords: "wrap around colour reversal nyquist velocity scale prf"
+    what: "Sampling error in pulsed-wave and colour-flow ultrasound, where the measured velocity of the blood flow is faster than the rate at which it is sampled by the scanner.",
+    physics: "In pulsed-wave mode the scanner sends pulses at the rate of the Pulse Repetition Frequency (PRF). To abide by the Nyquist theorem the rate at which the blood flow velocity is sampled must be at minimum double the Doppler frequency shift of the blood velocity in order to get an accurate determination of the signal. When sampling at a rate lower than this, aliasing occurs, where the scanner essentially 'misses' the cycles of the pulse. ", 
+    reduce:["Increase the pulse repeition frequency (PRF) setting to raise the Nyquist limit",
+    "Reduce the imaging depth - as imaging depth is reduced the PRF will automatically increase, as the faster echoes return to the transducer", "Select a lower frequency transducer"],
+    spotting: ["On pulsed-wave (PW) Doppler look for a 'wrap-around' affect, the peak of the waveform appears cut-off and reappears on the bottom of the image display", "On a colour-flow Doppler map, the scanner can misinterpret the direction of high velocity blood, creating a turbulent colourful 'mosaic' pattern instead of just showing the diretcion of uniform high velocity blood flow. "],
+    keywords: "wrap around colour reversal nyquist velocity scale prf mosaic sampling turbulent colourful pattern"
   },
   {
     id: "colour-blooming",
@@ -220,37 +222,41 @@ const artifacts = [
     id: "probe-pressure",
     category: "miscellaneous",
     name: "Probe pressure artefact",
-    what: "Compression from the transducer changes the shape or position of soft tissues and may alter flow.",
-    physics: "Pressure deforms compliant structures and can compress superficial veins or other vessels, changing their calibre and potentially reducing or stopping flow. It can also displace mobile contents.",
-    spotting: ["Look for changes that appear as the probe is pressed or released.", "Use the minimum pressure needed for adequate contact and image quality.", "Compare with a light-touch view, especially when assessing superficial vessels."],
-    keywords: "compression pressure vein collapse deformation probe"
+    what: "Applying inconsistent or greater than necessary mechanical pressure on the transducer when scanning a patient.",
+    physics: "Excessive pressure when using the probe can compress blood vessels and tissues, changing flow dynamics or shifting Doppler measurements",
+    reduce:["Use gentle contact during scanning", "Ensure advanced image processing options such as harmonic imaging, spatial compounding and speckle reduction imaging is turned on to smooth out noise and artifacts from uneven probe pressure"],
+    spotting: ["Certain structures which are normally round appear oval, such as the arteries or veins", "In Doppler imaging,there may be sudden aliasing if mechanical pressure applied is too high due to the mechanical pressure forcing blood through a restricted space"],
+    keywords: "compression pressure vein collapse deformation probe aliasing colour doppler artery oval "
   },
   {
     id: "motion-misregistration",
     category: "miscellaneous",
     name: "Motion misregistration",
-    what: "Anatomy appears blurred, duplicated or displaced when the patient or probe moves during image acquisition.",
-    physics: "The image is assembled from echoes acquired over time. Movement between scan lines or frames means the displayed lines no longer represent the same anatomical position.",
-    spotting: ["Look for blurred or discontinuous boundaries and duplicated edges.", "Ask the patient to pause movement or breathing briefly when appropriate.", "Stabilise the probe and repeat the image."],
-    keywords: "blur duplicate edges movement breathing patient"
+    what: "Occurs due to patient motion, including breathing and internal organ motion, which is disruptive in 3D/4D volume reconstruction.",
+    physics: "These artifacts are specifically troublesome in 3D and 4D imaging due to the reliance on stitching 2D slices together to form a volume. Patient movement, internal physiological motion and unsteady motion of the transducer during scanning causes structures and boundaries of the reconstruction to be displayed in the wrong location.",
+    reduce:["Can use breath-holding techniques to eliminate respitory motion during scans of the chest, upper abdomen or thyroid", "Uae cardiac gating settings", "Use higher frame rate aquisition"],
+    spotting: ["Look for discontinuities and jagged edges in 3D ultrasound volumes.", "Look for blurring of anatomical borders or shadows which obscure underlying structures"],
+    keywords: "blur duplicate edges movement breathing patient motion blurring 3D 4D volume"
   },
   {
     id: "gas",
     category: "miscellaneous",
     name: "Gas interference",
-    what: "Gas limits visualisation of deeper structures by reflecting and scattering the ultrasound beam.",
-    physics: "The large acoustic impedance difference at a gas–tissue interface causes strong reflection and scattering. Reverberation and dirty shadowing may further obscure structures beyond the gas.",
-    spotting: ["Look for a bright, irregular interface with dirty shadowing or reverberation.", "Try a different acoustic window or patient position if appropriate.", "Document limits to visualisation rather than interpreting obscured anatomy as absent."],
-    keywords: "bowel gas dirty shadowing reverberation obscured"
+    what: "When ultrasound waves encounter gas-filled structures, there is poor transmission of the sound waves",  
+    physics: "Due to the massive acoustic impedance mismatch between the gas bubbles and the air, the ultrasound waves are scattered or reflected back, and bounce back and forth repeatedly between the gas and the transducer interface. These are misinterpreted by the scanner as multiple structures deeper in the body.",
+    reduce:["Lower the transducer frequency to gain deeper penetration through regions of gas", "Adjust the time gain compensation and focus zones", "Enable harmonic imaging to reduce the clutter and side-lobe artifacts produced from the interface with gas"],
+    spotting: ["Look for horizontal repetitive echo lines due to the beam reflecting between tissue and gas", "When the ultrasound waves interacts with small gas bubbles, these resonate, which will send continuous, high frequency signals back to the transducer, known as comet-tail artifacts. These manifest as a bright white vertical beam projecting back from a highly reflective surface.", "Gas interference artifacts are commonly found in the lungs, bowel and gallbladder"],
+    keywords: "bowel gas shadowing comet tail reflect line resonate gallbladder lung"
   },
   {
     id: "speed-error",
     category: "miscellaneous",
-    name: "Propagation speed error",
-    what: "A structure may appear at the wrong depth when sound travels through tissue at a speed different from the scanner's assumed average.",
-    physics: "The scanner calculates depth using an assumed average sound speed of about 1540 m/s in soft tissue. If the actual path speed differs, echo travel time is converted to an inaccurate depth.",
-    spotting: ["Look for unexpected displacement or distortion deep to tissues with different sound speeds.", "Check anatomy in another plane or from another acoustic window.", "Consider other causes of displacement before attributing it to a speed error."],
-    keywords: "1540 speed depth displacement wrong position"
+    name: "Propagation velocity artifact",
+    what: "Artifact that occurs when sound travels through the tissue that varies from the scanner preset.",
+    physics: "Ultrasound scanners assume that sound waves travel through soft tissue at an average speed of 1,540 m/s. The depth of structure is calculated by using this speed and the time it takes for the echoes to return. However, at speeds greater or slower than this soft tissue value, the scanner will mistakenly calculate a structure as being shallower or deeper than its true position.",
+    reduce:["To mitigate the artifact can change the angle of insonation to avoid scanning through thick layers of fat", "Use tissue harmonic imaging or spatial compounding to reduce noise/distortion caused by the variations of the speed of sound through different tissues"],
+    spotting: ["Look for artificially displaced organ boundaries - for example local liver fat can cause a segment of the diaphragm located beneath the fat to appear displaced deeper", "If using a biopsy needle or guide wire while scanning, the shaft of the needle may appear bent or disjointed"],
+    keywords: "1540 speed depth displacement wrong position bent displaced slow fast deep shallow velocity fat liver diaphragm"
   }
 ];
 
