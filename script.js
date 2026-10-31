@@ -84,19 +84,22 @@ const artifacts = [
     id: "colour-blooming",
     category: "doppler",
     name: "Colour blooming",
-    what: "Colour extends beyond the vessel or flow boundary, making the lumen appear larger than it is.",
-    physics: "Excessive colour gain makes low-level noise visible around the true Doppler signal. The displayed colour therefore spills into adjacent tissue and obscures the actual vessel margins.",
-    spotting: ["Look for colour spilling beyond the visible vessel wall.", "Reduce colour gain until background colour speckle just disappears.", "Reassess the vessel boundary in greyscale and with a smaller colour box."],
-    keywords: "colour outside vessel spill gain bleed blooming"
+    what: "Occurs when the colour doppler signal exceeds past the boundaries of the structure being imaged, causing blood vessels to look larger than in reality.",
+    physics: "A colour gain which is too high will cause the signal to saturate and spill over to other regions of the display, additionally, a too low wall filter will fail to remove noise near wall vessels, increasing the oversaturated signal.",
+    reduce:["Reduce colour gain and increase pulse repetition frequency",
+    "Increase the wall filter setting to remove low-frequency noise"],
+    spotting: ["Colour signal which bleeds outside the anatomical structure into surrounding tissue", "Noisy patches of colour flashing in stationary tissue next to the blood vessel being imaged"],
+    keywords: "colour outside vessel spill gain bleed blooming noise wall filter saturated"
   },
   {
     id: "spectral-broadening",
     category: "doppler",
     name: "Spectral broadening",
-    what: "A Doppler spectrum occupies a wider range of velocities than a narrow laminar flow profile would suggest.",
-    physics: "A range of velocities can be sampled across the beam and the vessel. Broadening is also increased by a large sample gate, poor angle correction, excessive gain or disturbed flow. Some broadening is normal; it is not by itself proof of disease.",
-    spotting: ["Look for filling-in of the spectral window beneath the waveform.", "Check the sample gate size, Doppler angle and gain before interpreting.", "Correlate with the site, vessel geometry and the rest of the examination."],
-    keywords: "spectral window filling turbulent velocity broad"
+    what: "Spectral broadening refers to a widening of the range of blood flow velocities due to the broadening of the Doppler spectrum, suggesting turbulent flow - it can be used as a sign of stenosis, or be an artifact caused by improper scanner settings.",
+    physics: "Spectral broadening caused by pathology sugests stenosis due to a wide mixture of blood velocities caused by vessel narrowing, however, setting the Doppler gain too high can 'bloom' the signal, mimicking the turbulence. Using a too wide sample gate or an off-centre sample gate can also cause this.",
+    reduce:["Reduce the Doppler gain", "Decrease sample gate size and ensure the gate is positioned centrally in the region of interest", "Increase the wall filter to reduce noise which bleeds into the waveform"],
+    spotting: ["Look for a fuzzy/hazy imaging window - if the 'turbulence' looks more uniform across the entire window instead of chaotic the spectral broadening may be an artifact", "Look at the waveform - if the entire top line of the waveform looks very thick and smeared it could be artificial broadening"],
+    keywords: "spectral window filling turbulent velocity broad waveform haze fuzzy uniform artficial"
   },
   {
     id: "flash-artifact",
