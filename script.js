@@ -86,7 +86,7 @@ const artifacts = [
     name: "Colour blooming",
     what: "Occurs when the colour doppler signal exceeds past the boundaries of the structure being imaged, causing blood vessels to look larger than in reality.",
     physics: "A colour gain which is too high will cause the signal to saturate and spill over to other regions of the display, additionally, a too low wall filter will fail to remove noise near wall vessels, increasing the oversaturated signal.",
-    reduce:["Reduce colour gain and increase pulse repetition frequency",
+    reduce:["Reduce colour gain and increase pulse repetition frequency"," Adjust the colour priority setting so greyscale properly overrides excessive colour information",
     "Increase the wall filter setting to remove low-frequency noise"],
     spotting: ["Colour signal which bleeds outside the anatomical structure into surrounding tissue", "Noisy patches of colour flashing in stationary tissue next to the blood vessel being imaged"],
     keywords: "colour outside vessel spill gain bleed blooming noise wall filter saturated"
@@ -104,20 +104,22 @@ const artifacts = [
   {
     id: "flash-artifact",
     category: "doppler",
-    name: "Flash (motion) artefact",
-    what: "A brief burst of colour Doppler signal caused by movement of tissue or the transducer rather than blood flow.",
-    physics: "Moving tissue produces Doppler shifts. If the wall filter and motion rejection cannot remove these low-frequency shifts, the system displays them as colour flow.",
-    spotting: ["Look for a broad, transient colour flash across tissue.", "The signal may follow probe movement, breathing or patient motion.", "Stabilise the probe and repeat the observation; true flow is usually more localised and repeatable."],
-    keywords: "flash motion tissue movement probe colour"
+    name: "Colour flash artifact",
+    what: "A sudden false burst of colour due to transducer motion or physiological motion",
+    physics: "Transducer motion and physiological motion generates a Doppler shift due to motion causing a shift in frequency, and therefore generating a colour signal.",
+    reduce:["Increase the pulse repetition frequency, which will make the system less sensitive to the low frequency motion signals", "Raise the wall filter to filter out low-frequency noise", "Hold the ultrasound transducer completely still"],
+    spotting: ["Look for a flash of colour which does not remain steady", "Look for a colour signal that does not pulsate with the cardiac cycle", "Colour flash artifacts are triggered by movement and usually dissipate when the transducer is held completely still"],
+    keywords: "flash motion tissue movement probe colour doppler burst"
   },
   {
-    id: "colour-priority",
+    id: "twinkling-artifact",
     category: "doppler",
-    name: "Colour priority overwrite",
-    what: "Colour Doppler replaces greyscale echoes in areas where the colour signal is given display priority.",
-    physics: "The system assigns display priority to colour pixels over B-mode echoes. If priority is high, colour can mask tissue detail or make the vessel boundary appear to extend beyond its true margin.",
-    spotting: ["Look for missing or obscured greyscale detail beneath the colour map.", "Reduce colour priority or gain and reassess the underlying B-mode image.", "Use a smaller colour region to reduce unnecessary overwrite."],
-    keywords: "overwrite priority colour masks greyscale"
+    name: "Twinkling artifact",
+    what: "Alternating colours shown on a Doppler signal behind a reflective object, giving the appearance of turbulent flow",
+    physics: "This artifact can be caused by ultrasound waves hitting reflective surfaces, scattering and splitting into multidirectional patterns.<b> Twinkling artifacts are typically considered 'friendly' artifacts because they help locate very small (< 5 mm) kidney or urinary stones which are ambiguous on standard B-mode ultrasound - even an extremely small stone can produce a large twinkling artifact in colour Doppler mode.",
+    reduce:["Even though twinkling artifacts can be friendly artifacts for calculi detection, their reduction can be helpful to prevent false-positives when diagnosing inflammation or bleeding, as twinkling can be mistaken for true blood flow.", "To reduce twinkling, move the focal zone away from the reflective surface (e.g. stone, calculi)", "Reduce colour gain", "Change angle of insonation relative to the reflective surface", "Lower the colour priority setting so colour signals don't overlay the grayscale as harshly"],
+    spotting: ["Look for a flickering colour mosaic which rapidly fluctuates", "It will typically be present behind a strongly reflective, stationary object (e.g. a kidney stone)"],
+    keywords: "twinkling twinkle turbulent flashing mosaic doppler kidney stone calculi reflective"
   },
   {
     id: "dead-element",
