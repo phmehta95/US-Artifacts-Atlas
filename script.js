@@ -168,15 +168,15 @@ const artifacts = [
     name: "Range ambiguity",
     what: "The ultrasound image shows a deep organ/structure much closer to the surface than it actually is.",
     physics: "Caused by a too high pulse repetition frequency so an echo from a deeper structure arrives after the next pulse has already been transmitted.",
-    reduce:["Move the ultrasound prove away from devices which could produce electromagnetic or radiofrequency interference",
-    "Ensure noise-reduction filters, such as Speckle Reduction Imaging is turned on in the system presets", "If the noise has been isolated to the probe, it must be removed from clinical service and be repaired/replaced."],
+    reduce:["Lower the pulse repetition frequency",
+    "Increase the imaging depth", "Adjust time-gain compensation"],
     spotting: ["Look for an organ appearing implausibly shallow in the body", "Structures appear to lack proper borders", "In Doppler imaging, what should be e.g. a deep blood vessel appears to be very close to the surface"],
     keywords: "wrong depth late echo pulse repetition frequency prf noisy cloudy shallow vessel bladder superficial"
   },
   {
     id: "side-lobes",
     category: "system",
-    name: "Side-lobe artefact",
+    name: "Side-lobe artifact",
     what: "When the side axis beams (side-lobes) of an ultrasound beam reflect from a strong reflector outside the main beam axis.",
     physics: "The piezoelectric crystals in the transducer expand and contract to produce ultrasound beams on-axis, but due to expansion and contraction also occurring radially, side-lobe beams are produced. These reflect off off-axis boundaries and display echoes with false positioning.",
     reduce:["Switch to harmonic imaging - not using the fundamental frequencies reduces the divergence of the beam, reducing side-lobe production  ","Turn on Speckle Reduction Imaging to reduce noise ", "Increasing the number of focal zones - this narrows the beam at multiple depths"],
@@ -186,7 +186,7 @@ const artifacts = [
   {
     id: "grating-lobes",
     category: "system",
-    name: "Grating-lobe artefact",
+    name: "Grating-lobe artifact",
     what: "Off-axis ultrasonic beams produced by transducer element array spacing",
     physics: "If the distance between individual piezoelectric crystal elements (pitch) is equal to or greater than the wavelength of the ultrasound wave, the transducer undersamples the wavefront and the system can no longer distinguish between a wave returning from the centre one returning from a side angle.",
     reduce:["Switch to harmonic imaging - grating lobes do not have energy to produce harmonic frequencies, reducing these artifacts", "Adjust the focal zone to direct at or below the structure being imaged, minimising energy spread at this depth","Decrease time gain compensation at the depth of the structure being imaged"],
@@ -226,7 +226,7 @@ const artifacts = [
   {
     id: "probe-pressure",
     category: "miscellaneous",
-    name: "Probe pressure artefact",
+    name: "Probe pressure artifact",
     what: "Applying inconsistent or greater than necessary mechanical pressure on the transducer when scanning a patient.",
     physics: "Excessive pressure when using the probe can compress blood vessels and tissues, changing flow dynamics or shifting Doppler measurements",
     reduce:["Use gentle contact during scanning", "Ensure advanced image processing options such as harmonic imaging, spatial compounding and speckle reduction imaging is turned on to smooth out noise and artifacts from uneven probe pressure"],
@@ -586,12 +586,12 @@ function renderSearchResults() {
 
   const matches = searchArtifacts(query);
   if (matches.length === 0) {
-    searchResults.innerHTML = `<p class="result-count">No artefacts found for “${escapeHtml(query.trim())}”. Try a different name or keyword.</p>`;
+    searchResults.innerHTML = `<p class="result-count">No artifacts found for “${escapeHtml(query.trim())}”. Try a different name or keyword.</p>`;
     return;
   }
 
   searchResults.innerHTML = `
-    <p class="result-count">${matches.length} ${matches.length === 1 ? "artefact" : "artefacts"} found</p>
+    <p class="result-count">${matches.length} ${matches.length === 1 ? "artifact" : "artifacts"} found</p>
     ${matches.map((artifact) => `
       <button class="result-button" type="button" data-artifact-id="${artifact.id}" aria-current="${artifact.id === artifactSelect.value}">
         <span class="result-title">${artifact.name}</span>
