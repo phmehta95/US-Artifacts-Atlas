@@ -403,6 +403,10 @@ h1 {
   object-fit: contain;
 }
 
+.primary-image-wrap img[hidden] {
+  display: none;
+}
+
 .image-empty {
   max-width: 220px;
   margin: 0;
@@ -455,6 +459,72 @@ h1 {
 .upload-button:disabled {
   cursor: wait;
   opacity: .65;
+}
+
+.review-dialog {
+  width: min(520px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--ink);
+  box-shadow: 0 8px 30px #102f4380;
+}
+
+.review-dialog::backdrop {
+  background: #102f4380;
+}
+
+.review-dialog-content {
+  padding: 25px;
+}
+
+.review-dialog h2 {
+  margin-bottom: 12px;
+  color: var(--nhs-dark-blue);
+  font-size: 23px;
+}
+
+.review-dialog p {
+  margin-bottom: 13px;
+}
+
+.review-confirmation {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.review-confirmation input {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  margin: 2px 0 0;
+}
+
+.review-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 21px;
+}
+
+.secondary-button {
+  min-height: 42px;
+  padding: 8px 15px;
+  border: 1px solid #8297a1;
+  border-radius: 3px;
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.secondary-button:hover {
+  background: #f3f7f8;
 }
 
 .image-caption-fields {
@@ -614,6 +684,155 @@ h1 {
   background: #eaf3f8;
 }
 
+.review-page-main {
+  width: min(960px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.review-panel {
+  margin: 25px 0 42px;
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--nhs-blue);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.review-panel h1 {
+  font-size: clamp(28px, 5vw, 38px);
+}
+
+.review-panel p:last-child {
+  margin: 20px 0 0;
+}
+
+.review-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+#reviewer-login-form[hidden],
+#reviewer-queue[hidden] {
+  display: none;
+}
+
+.reviewer-login-form {
+  display: grid;
+  max-width: 460px;
+  gap: 9px;
+  margin-top: 22px;
+}
+
+.reviewer-login-form label {
+  font-weight: 700;
+}
+
+.reviewer-login-form input {
+  min-height: 46px;
+  padding: 8px 11px;
+  border: 1px solid #8297a1;
+  border-radius: 3px;
+  background: #fff;
+}
+
+.reviewer-login-form .upload-button {
+  justify-self: start;
+  margin-top: 4px;
+}
+
+.reviewer-login-form .upload-status {
+  min-height: 1.5em;
+}
+
+.reviewer-queue {
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.reviewer-queue-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.reviewer-queue-toolbar h2 {
+  margin: 0;
+  color: var(--nhs-dark-blue);
+  font-size: 22px;
+}
+
+.review-submissions {
+  display: grid;
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.review-submission-card {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #fff;
+}
+
+.review-submission-card h3 {
+  margin: 0;
+  color: var(--nhs-dark-blue);
+  font-size: 20px;
+}
+
+.review-submission-category,
+.review-submission-meta {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.review-submission-caption {
+  margin: 14px 0 0;
+  padding: 11px 12px;
+  background: #f3f7f8;
+  overflow-wrap: anywhere;
+}
+
+.review-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.review-preview-grid figure {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--border);
+  background: #e8eff3;
+}
+
+.review-preview-grid img {
+  display: block;
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+}
+
+.review-preview-grid figcaption {
+  padding: 7px 9px;
+  background: #fff;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.review-submission-status {
+  margin: 12px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
 .education-note p {
   margin: 0;
   color: #334e5f;
@@ -676,6 +895,23 @@ footer {
   .nhs-logo {
     width: 100px;
     height: 42px;
+  }
+
+  .review-page-main {
+    width: min(100% - 32px, 720px);
+  }
+
+  .review-panel {
+    padding: 20px 17px;
+  }
+
+  .reviewer-queue-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .reviewer-queue-toolbar .review-page-actions {
+    width: 100%;
   }
 
   .header-note {

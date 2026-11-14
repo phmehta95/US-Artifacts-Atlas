@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#005eb8">
+    <title>Private image review | Barts Health NHS Trust</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="review.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <div class="nhs-header">
+        <a class="nhs-brand" href="/" aria-label="Barts Health NHS Trust Ultrasound Physics home">
+          <img class="nhs-logo" src="assets/nhs_logo.svg" alt="NHS logo">
+          <span class="brand-name">Barts Health NHS Trust <span>Ultrasound Physics</span></span>
+        </a>
+        <span class="header-note">Private reviewer dashboard</span>
+      </div>
+      <div class="header-rule"></div>
+    </header>
+
+    <main class="review-page-main">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Ultrasound artifact atlas</a>
+        <span aria-hidden="true">›</span>
+        <span>Private image review</span>
+      </nav>
+
+      <section class="review-panel" aria-labelledby="review-page-heading">
+        <p class="eyebrow">Barts Health NHS Trust · Ultrasound Physics</p>
+        <h1 id="review-page-heading">Private image review</h1>
+        <p>Sign in to review private image submissions. Images are not visible in the atlas unless approved.</p>
+
+        <form id="reviewer-login-form" class="reviewer-login-form">
+          <label for="reviewer-password">Reviewer password</label>
+          <input id="reviewer-password" name="password" type="password" autocomplete="current-password" required>
+          <button class="upload-button" type="submit">Sign in</button>
+          <p id="login-status" class="upload-status" role="status" aria-live="polite"></p>
+        </form>
+
+        <section id="reviewer-queue" class="reviewer-queue" aria-labelledby="review-queue-heading" hidden>
+          <div class="reviewer-queue-toolbar">
+            <h2 id="review-queue-heading">Submissions awaiting review</h2>
+            <div class="review-page-actions">
+              <button id="refresh-review-queue" class="secondary-button" type="button">Refresh</button>
+              <button id="reviewer-logout" class="secondary-button" type="button">Sign out</button>
+            </div>
+          </div>
+          <p id="queue-status" class="upload-status" role="status" aria-live="polite"></p>
+          <div id="review-submissions" class="review-submissions"></div>
+        </section>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <div>
+          <strong>Barts Health NHS Trust</strong>
+          <p>Ultrasound Physics educational resource.</p>
+        </div>
+        <p>Reviewer access is private. Do not approve images containing patient-identifiable information.</p>
+      </div>
+    </footer>
+  </body>
+</html>

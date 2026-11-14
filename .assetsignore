@@ -1,0 +1,10 @@
+worker.js
+wrangler.jsonc
+.assetsignore
+README.md
+.vscode/
+.git/
+node_modules/
+.wrangler/
+migrations/
+tests/

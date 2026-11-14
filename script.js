@@ -273,12 +273,55 @@ const clearSearchButton = document.querySelector("#clear-search");
 const searchResults = document.querySelector("#search-results");
 const searchHint = document.querySelector("#search-hint");
 const atlasCount = document.querySelector("#atlas-count");
-const LOCAL_IMAGE_DATABASE = "ultrasound-artifact-atlas";
-const LOCAL_IMAGE_STORE = "artifact-images";
 const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
+const MAX_TOTAL_IMAGE_BYTES = 6 * 1024 * 1024;
+const MAX_UPLOAD_FILES = 5;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
-let localImageDatabasePromise;
-let activeImageUrls = [];
+const imageReviewDialog = document.querySelector("#image-review-dialog");
+const agreeImageReviewButton = document.querySelector("#agree-image-review");
+const declineImageReviewButton = document.querySelector("#decline-image-review");
+const imagePrivacyConfirmation = document.querySelector("#image-privacy-confirmation");
+let pendingUploadAction = null;
+let pendingUploadStatus = null;
+
+agreeImageReviewButton.addEventListener("click", () => {
+  const uploadAction = pendingUploadAction;
+  pendingUploadAction = null;
+  pendingUploadStatus = null;
+  imageReviewDialog.close();
+  resetImagePrivacyConfirmation();
+  if (uploadAction) {
+    uploadAction();
+  }
+});
+
+declineImageReviewButton.addEventListener("click", () => {
+  if (pendingUploadStatus) {
+    pendingUploadStatus.textContent = "Upload cancelled. The images were not saved or emailed.";
+  }
+  pendingUploadAction = null;
+  pendingUploadStatus = null;
+  imageReviewDialog.close();
+  resetImagePrivacyConfirmation();
+});
+
+imageReviewDialog.addEventListener("cancel", () => {
+  if (pendingUploadStatus) {
+    pendingUploadStatus.textContent = "Upload cancelled. The images were not saved or emailed.";
+  }
+  pendingUploadAction = null;
+  pendingUploadStatus = null;
+  resetImagePrivacyConfirmation();
+});
+
+imagePrivacyConfirmation.addEventListener("change", () => {
+  agreeImageReviewButton.disabled = !imagePrivacyConfirmation.checked;
+});
+
+function resetImagePrivacyConfirmation() {
+  imagePrivacyConfirmation.checked = false;
+  agreeImageReviewButton.disabled = true;
+}
 
 function getCategoryLabel(categoryId) {
   return categories.find((category) => category.id === categoryId)?.label ?? "";
@@ -309,9 +352,6 @@ function renderArtifact() {
     return;
   }
 
-  activeImageUrls.forEach((url) => URL.revokeObjectURL(url));
-  activeImageUrls = [];
-
   details.innerHTML = `
     <div class="artifact-heading">
       <p class="eyebrow">${getCategoryLabel(artifact.category)}</p>
@@ -324,7 +364,7 @@ function renderArtifact() {
           <p>${artifact.what}</p>
         </div>
         <div class="primary-image-wrap">
-          <p class="image-empty" id="primary-image-empty">No example image has been added yet.</p>
+          <p class="image-empty" id="primary-image-empty">No reviewed example image has been added yet.</p>
           <img id="primary-artifact-image" alt="${artifact.name} example image" hidden>
         </div>
         <div class="image-actions">
@@ -333,11 +373,11 @@ function renderArtifact() {
           <div class="image-caption-fields">
             <label class="caption-label" for="image-caption">Caption for uploaded images <span>(optional)</span></label>
             <input id="image-caption" class="caption-input" type="text" maxlength="500" placeholder="Describe what the image demonstrates">
-            <button id="upload-image-button" class="upload-button" type="button">Upload images</button>
+            <button id="upload-image-button" class="upload-button" type="button">Submit for review</button>
           </div>
           <a id="gallery-link" class="gallery-link" href="#artifact-image-gallery" hidden>View image gallery</a>
-          <p class="upload-instructions">Choose image files, add an optional caption, then select Upload images. The caption appears below the image in the gallery.</p>
-          <p class="local-storage-note">Images are saved in this browser only. They are not uploaded to a server or shared with other users.</p>
+          <p class="upload-instructions">Choose up to 5 de-identified JPEG, PNG or WebP images (6 MB combined), add an optional caption, then submit them for review.</p>
+          <p class="local-storage-note">Submissions are stored privately and remain hidden from the gallery until approved by the Barts Ultrasound Physics team.</p>
           <p id="image-upload-status" class="upload-status" role="status" aria-live="polite"></p>
         </div>
       </section>
@@ -355,7 +395,7 @@ function renderArtifact() {
       </section>
       <section id="artifact-image-gallery" class="image-gallery" aria-labelledby="gallery-heading" hidden>
         <h4 id="gallery-heading">Example image gallery</h4>
-        <p class="gallery-hint">Scroll horizontally to browse this artefact’s images.</p>
+        <p class="gallery-hint">Only images approved by the Barts Ultrasound Physics team appear in this gallery.</p>
         <div class="image-gallery-grid" id="image-gallery-grid" tabindex="0" aria-label="${artifact.name} example images"></div>
       </section>
     </div>
@@ -373,128 +413,86 @@ function setupLocalImageUpload(artifact) {
 
   const selectFiles = (files) => {
     selectedFiles = [...files];
-    uploadStatus.textContent = selectedFiles.length
-      ? `${selectedFiles.length} ${selectedFiles.length === 1 ? "image" : "images"} selected.`
-      : "";
+    if (!selectedFiles.length) {
+      uploadStatus.textContent = "";
+      return;
+    }
+
+    const totalBytes = selectedFiles.reduce((total, file) => total + file.size, 0);
+    if (
+      selectedFiles.length > MAX_UPLOAD_FILES ||
+      totalBytes > MAX_TOTAL_IMAGE_BYTES ||
+      selectedFiles.some((file) => !ALLOWED_IMAGE_TYPES.includes(file.type) || file.size > MAX_IMAGE_BYTES)
+    ) {
+      uploadStatus.textContent = "Choose up to 5 JPEG, PNG or WebP images, no larger than 6 MB combined.";
+      return;
+    }
+    uploadStatus.textContent = `${selectedFiles.length} ${selectedFiles.length === 1 ? "image" : "images"} selected.`;
   };
 
   fileInput.addEventListener("change", () => {
     selectFiles(fileInput.files);
   });
 
-  uploadButton.addEventListener("click", async () => {
+  uploadButton.addEventListener("click", () => {
     const files = selectedFiles;
     if (!files.length) {
       uploadStatus.textContent = "Choose one or more image files first.";
       return;
     }
-    if (files.some((file) => !ALLOWED_IMAGE_TYPES.includes(file.type) || file.size > MAX_IMAGE_BYTES)) {
-      uploadStatus.textContent = "Choose JPEG, PNG or WebP images no larger than 6 MB each.";
-      fileInput.value = "";
+    const totalBytes = files.reduce((total, file) => total + file.size, 0);
+    if (
+      files.length > MAX_UPLOAD_FILES ||
+      totalBytes > MAX_TOTAL_IMAGE_BYTES ||
+      files.some((file) => !ALLOWED_IMAGE_TYPES.includes(file.type) || file.size > MAX_IMAGE_BYTES)
+    ) {
+      uploadStatus.textContent = "Choose up to 5 JPEG, PNG or WebP images, no larger than 6 MB combined.";
       return;
     }
 
-    uploadButton.disabled = true;
-    uploadStatus.textContent = `Saving ${files.length} ${files.length === 1 ? "image" : "images"} in this browser…`;
-    let saved = 0;
-    try {
-      for (const file of files) {
-        await saveLocalArtifactImage({
-          id: `image-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-          artifactId: artifact.id,
-          contentType: file.type,
-          caption: captionInput.value.trim(),
-          createdAt: Date.now(),
-          blob: file
-        });
-        saved += 1;
-      }
-      captionInput.value = "";
-      if (artifactSelect.value === artifact.id) {
+    const caption = captionInput.value.trim();
+    pendingUploadStatus = uploadStatus;
+    pendingUploadAction = async () => {
+      await sendImageSubmission(files, artifact, caption, captionInput, fileInput, uploadButton, uploadStatus, () => {
         selectedFiles = [];
-        fileInput.value = "";
-        await renderArtifactImages(artifact);
-        uploadStatus.textContent = `${saved} ${saved === 1 ? "image" : "images"} saved in this browser.`;
-      }
-    } catch (error) {
-      if (artifactSelect.value === artifact.id) {
-        if (saved) {
-          await renderArtifactImages(artifact);
-        }
-        uploadStatus.textContent = saved
-          ? `${saved} image${saved === 1 ? "" : "s"} saved, but the next image could not be saved: ${error.message}`
-          : `Could not save images: ${error.message}`;
-      }
-    } finally {
-      uploadButton.disabled = false;
+      });
+    };
+    resetImagePrivacyConfirmation();
+    imageReviewDialog.showModal();
+  });
+}
+
+async function sendImageSubmission(files, artifact, caption, captionInput, fileInput, uploadButton, uploadStatus, clearSelectedFiles) {
+  uploadButton.disabled = true;
+  uploadStatus.textContent = `Saving ${files.length} ${files.length === 1 ? "image" : "images"} privately for review…`;
+  try {
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append("images", file, file.name);
     }
-  });
-}
+    formData.set("artifactId", artifact.id);
+    formData.set("artifactName", artifact.name);
+    formData.set("artifactCategory", getCategoryLabel(artifact.category));
+    formData.set("caption", caption);
 
-function openLocalImageDatabase() {
-  if (localImageDatabasePromise) {
-    return localImageDatabasePromise;
+    const response = await fetch("/api/submissions", {
+      method: "POST",
+      body: formData
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || "The submission could not be saved.");
+    }
+
+    captionInput.value = "";
+    clearSelectedFiles();
+    fileInput.value = "";
+    uploadStatus.textContent = "Your submission has been saved privately for review. It will remain hidden from the site until approved.";
+  } catch (error) {
+    uploadStatus.textContent = `Could not save the review submission: ${error.message}`;
+  } finally {
+    uploadButton.disabled = false;
   }
-  if (!("indexedDB" in window)) {
-    return Promise.reject(new Error("This browser does not support local image storage."));
-  }
-
-  localImageDatabasePromise = new Promise((resolve, reject) => {
-    const request = indexedDB.open(LOCAL_IMAGE_DATABASE, 1);
-    request.onupgradeneeded = () => {
-      const database = request.result;
-      if (!database.objectStoreNames.contains(LOCAL_IMAGE_STORE)) {
-        const store = database.createObjectStore(LOCAL_IMAGE_STORE, { keyPath: "id" });
-        store.createIndex("artifactId", "artifactId", { unique: false });
-      }
-    };
-    request.onsuccess = () => {
-      request.result.onversionchange = () => request.result.close();
-      resolve(request.result);
-    };
-    request.onerror = () => {
-      localImageDatabasePromise = null;
-      reject(request.error ?? new Error("Could not open local image storage."));
-    };
-    request.onblocked = () => {
-      localImageDatabasePromise = null;
-      reject(new Error("Local image storage is busy in another atlas tab. Close the other tab and try again."));
-    };
-  });
-  return localImageDatabasePromise;
-}
-
-async function getLocalArtifactImages(artifactId) {
-  const database = await openLocalImageDatabase();
-  return new Promise((resolve, reject) => {
-    const transaction = database.transaction(LOCAL_IMAGE_STORE, "readonly");
-    const request = transaction.objectStore(LOCAL_IMAGE_STORE).index("artifactId").getAll(artifactId);
-    request.onsuccess = () => resolve(request.result.sort((first, second) => first.createdAt - second.createdAt));
-    request.onerror = () => reject(request.error ?? new Error("Could not read saved images."));
-    transaction.onabort = () => reject(transaction.error ?? new Error("Could not read saved images."));
-  });
-}
-
-async function saveLocalArtifactImage(image) {
-  const database = await openLocalImageDatabase();
-  return new Promise((resolve, reject) => {
-    const transaction = database.transaction(LOCAL_IMAGE_STORE, "readwrite");
-    transaction.objectStore(LOCAL_IMAGE_STORE).add(image);
-    transaction.oncomplete = resolve;
-    transaction.onerror = () => reject(transaction.error ?? new Error("Could not save the image in this browser."));
-    transaction.onabort = () => reject(transaction.error ?? new Error("Could not save the image in this browser."));
-  });
-}
-
-async function deleteLocalArtifactImage(imageId) {
-  const database = await openLocalImageDatabase();
-  return new Promise((resolve, reject) => {
-    const transaction = database.transaction(LOCAL_IMAGE_STORE, "readwrite");
-    transaction.objectStore(LOCAL_IMAGE_STORE).delete(imageId);
-    transaction.oncomplete = resolve;
-    transaction.onerror = () => reject(transaction.error ?? new Error("Could not delete the image."));
-    transaction.onabort = () => reject(transaction.error ?? new Error("Could not delete the image."));
-  });
 }
 
 async function renderArtifactImages(artifact) {
@@ -505,8 +503,6 @@ async function renderArtifactImages(artifact) {
   const galleryLink = document.querySelector("#gallery-link");
   const uploadStatus = document.querySelector("#image-upload-status");
 
-  activeImageUrls.forEach((url) => URL.revokeObjectURL(url));
-  activeImageUrls = [];
   gallery.replaceChildren();
   gallerySection.hidden = true;
   galleryLink.hidden = true;
@@ -514,15 +510,19 @@ async function renderArtifactImages(artifact) {
   emptyMessage.hidden = false;
 
   try {
-    const images = await getLocalArtifactImages(artifact.id);
+    const response = await fetch(`/api/gallery?artifact=${encodeURIComponent(artifact.id)}`);
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || "Could not load approved images.");
+    }
+    const images = result.images;
     if (artifactSelect.value !== artifact.id) {
       return;
     }
 
     if (images.length) {
       const firstImage = images[0];
-      primaryImage.src = URL.createObjectURL(firstImage.blob);
-      activeImageUrls.push(primaryImage.src);
+      primaryImage.src = `/api/gallery/${encodeURIComponent(firstImage.id)}`;
       primaryImage.alt = firstImage.caption || `${artifact.name} example image`;
       primaryImage.hidden = false;
       emptyMessage.hidden = true;
@@ -534,37 +534,22 @@ async function renderArtifactImages(artifact) {
         const figure = document.createElement("figure");
         figure.className = "image-gallery-item";
         const imageElement = document.createElement("img");
-        imageElement.src = URL.createObjectURL(image.blob);
-        activeImageUrls.push(imageElement.src);
+        imageElement.src = `/api/gallery/${encodeURIComponent(image.id)}`;
+        imageElement.loading = "lazy";
         imageElement.alt = image.caption || `${artifact.name} example ${index + 1}`;
         figure.append(imageElement);
         const caption = document.createElement("figcaption");
         caption.textContent = image.caption || `Example ${index + 1}`;
         figure.append(caption);
-        const deleteButton = document.createElement("button");
-        deleteButton.className = "delete-image-button";
-        deleteButton.type = "button";
-        deleteButton.textContent = "Delete image";
-        deleteButton.setAttribute("aria-label", `Delete ${image.caption || `${artifact.name} example ${index + 1}`}`);
-        deleteButton.addEventListener("click", async () => {
-          deleteButton.disabled = true;
-          uploadStatus.textContent = "Deleting image…";
-          try {
-            await deleteLocalArtifactImage(image.id);
-            await renderArtifactImages(artifact);
-            uploadStatus.textContent = "Image deleted.";
-          } catch (error) {
-            deleteButton.disabled = false;
-            uploadStatus.textContent = `Could not delete image: ${error.message}`;
-          }
-        });
-        figure.append(deleteButton);
         gallery.append(figure);
       });
     }
   } catch (error) {
-    emptyMessage.textContent = `Could not load local images: ${error.message}`;
-    uploadStatus.textContent = `Local image storage error: ${error.message}`;
+    if (artifactSelect.value !== artifact.id) {
+      return;
+    }
+    emptyMessage.textContent = `Could not load reviewed images: ${error.message}`;
+    uploadStatus.textContent = `Approved gallery error: ${error.message}`;
   }
 }
 
