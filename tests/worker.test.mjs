@@ -18,7 +18,9 @@ test("pending images stay private until an authenticated reviewer approves them"
   const { env, database, objects } = createEnvironment();
   const submissionResponse = await submitImage(env);
   assert.equal(submissionResponse.status, 200);
-  assert.equal((await submissionResponse.json()).accepted, true);
+  const submissionResult = await submissionResponse.json();
+  assert.equal(submissionResult.accepted, true);
+  assert.equal(submissionResult.notificationSent, false);
 
   const submissionId = [...database.submissions.keys()][0];
   const image = [...database.images.values()][0];
@@ -146,6 +148,98 @@ test("decline and expiry remove stored images without publishing them", async ()
   )).status, 404);
 });
 
+test("sends a Resend notification after saving a private image submission", async () => {
+  const { env, database, objects } = createEnvironment();
+  env.RESEND_API_KEY = "re_test_key";
+  const originalFetch = globalThis.fetch;
+  let resendRequest;
+  globalThis.fetch = async (url, options) => {
+    assert.equal(database.submissions.size, 1);
+    assert.equal(objects.size, 1);
+    resendRequest = { url, options };
+    return new Response(JSON.stringify({ id: "email_test_id" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  };
+
+  try {
+    const response = await submitImage(env);
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { accepted: true, notificationSent: true });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
+  assert.equal(resendRequest.url, "https://api.resend.com/emails");
+  assert.equal(resendRequest.options.headers.Authorization, "Bearer re_test_key");
+  const email = JSON.parse(resendRequest.options.body);
+  assert.equal(email.from, "Ultrasound Artifact Atlas <onboarding@resend.dev>");
+  assert.deepEqual(email.to, ["pruthvi.mehta@nhs.net"]);
+  assert.match(email.text, /awaiting review/);
+  assert.match(email.text, /\/review\.html/);
+  assert.doesNotMatch(email.text, /Review caption|sample\.jpg/);
+});
+
+test("reports a Resend delivery failure without losing the private submission", async () => {
+  const { env, database, objects } = createEnvironment();
+  env.RESEND_API_KEY = "re_test_key";
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response("Unauthorized", { status: 401 });
+
+  try {
+    const response = await submitImage(env);
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { accepted: true, notificationSent: false });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
+  assert.equal(database.submissions.size, 1);
+  assert.equal(objects.size, 1);
+});
+
+test("reviewers can delete approved images individually from the gallery", async () => {
+  const { env, database, objects } = createEnvironment();
+  const cookie = await reviewerCookie(env);
+
+  await submitImage(env, 2);
+  const submissionId = [...database.submissions.keys()][0];
+  const imageIds = [...database.images.keys()];
+  assert.equal((await decide(env, cookie, submissionId, "approved")).status, 200);
+
+  const unauthenticatedDelete = await worker.fetch(new Request(
+    `https://atlas.test/api/reviewer/gallery/${imageIds[0]}`,
+    {
+      method: "DELETE",
+      headers: { Origin: "https://atlas.test" }
+    }
+  ), env);
+  assert.equal(unauthenticatedDelete.status, 401);
+
+  const listResponse = await worker.fetch(new Request("https://atlas.test/api/reviewer/gallery", {
+    headers: { Cookie: cookie }
+  }), env);
+  assert.equal(listResponse.status, 200);
+  assert.equal((await listResponse.json()).images.length, 2);
+
+  const firstDelete = await deleteApprovedImage(env, cookie, imageIds[0]);
+  assert.equal(firstDelete.status, 200);
+  assert.equal(database.submissions.get(submissionId).status, "approved");
+  assert.equal((await getGallery(env, "reverberation")).images.length, 1);
+  assert.equal((await worker.fetch(
+    new Request(`https://atlas.test/api/gallery/${imageIds[0]}`),
+    env
+  )).status, 404);
+  assert.equal(objects.size, 1);
+
+  const lastDelete = await deleteApprovedImage(env, cookie, imageIds[1]);
+  assert.equal(lastDelete.status, 200);
+  assert.equal(database.submissions.has(submissionId), false);
+  assert.equal((await getGallery(env, "reverberation")).images.length, 0);
+  assert.equal(objects.size, 0);
+});
+
 test("reviewer login rejects cross-origin requests and unconfigured access", async () => {
   const { env } = createEnvironment();
   const crossOrigin = await worker.fetch(new Request("https://atlas.test/api/reviewer/login", {
@@ -169,9 +263,12 @@ test("reviewer login rejects cross-origin requests and unconfigured access", asy
   assert.equal(unconfigured.status, 503);
 });
 
-async function submitImage(env) {
+async function submitImage(env, imageCount = 1) {
   const form = new FormData();
-  form.append("images", new File([jpegBytes], "sample.jpg", { type: "image/jpeg" }));
+  for (let index = 0; index < imageCount; index += 1) {
+    const filename = imageCount === 1 ? "sample.jpg" : `sample-${index + 1}.jpg`;
+    form.append("images", new File([jpegBytes], filename, { type: "image/jpeg" }));
+  }
   form.set("artifactId", "reverberation");
   form.set("artifactName", "Reverberation");
   form.set("artifactCategory", "Acoustic artifacts");
@@ -209,6 +306,16 @@ async function decide(env, cookie, submissionId, decision) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({ submissionId, decision })
+  }), env);
+}
+
+async function deleteApprovedImage(env, cookie, imageId) {
+  return worker.fetch(new Request(`https://atlas.test/api/reviewer/gallery/${imageId}`, {
+    method: "DELETE",
+    headers: {
+      Origin: "https://atlas.test",
+      Cookie: cookie
+    }
   }), env);
 }
 
@@ -257,7 +364,7 @@ class MemoryD1 {
   async batch(statements) {
     const results = [];
     for (const statement of statements) results.push(await statement.run());
-    return { results };
+    return results;
   }
 }
 
@@ -284,6 +391,16 @@ class MemoryStatement {
       const [id, submission_id, filename, content_type, object_key, size_bytes] = this.values;
       images.set(id, { id, submission_id, filename, content_type, object_key, size_bytes });
       return { meta: { changes: 1 } };
+    }
+    if (this.sql.startsWith("DELETE FROM submission_images") && this.sql.includes("WHERE id = ?")) {
+      const [id, submission_id] = this.values;
+      const image = images.get(id);
+      const submission = submissions.get(submission_id);
+      if (image?.submission_id === submission_id && submission?.status === "approved") {
+        images.delete(id);
+        return { meta: { changes: 1 } };
+      }
+      return { meta: { changes: 0 } };
     }
     if (this.sql.startsWith("UPDATE submissions") && this.sql.includes("SET status = ?, review_token_hash = NULL")) {
       const [status, reviewed_at, id, now] = this.values;
@@ -316,6 +433,14 @@ class MemoryStatement {
     }
     if (this.sql.startsWith("DELETE FROM submissions")) {
       const submission = submissions.get(this.values[0]);
+      if (this.sql.includes("status = 'approved'")) {
+        const hasImages = [...images.values()].some((image) => image.submission_id === this.values[0]);
+        if (submission?.status === "approved" && !hasImages) {
+          submissions.delete(this.values[0]);
+          return { meta: { changes: 1 } };
+        }
+        return { meta: { changes: 0 } };
+      }
       if (submission?.status === "rejected") {
         submissions.delete(this.values[0]);
         return { meta: { changes: 1 } };
@@ -343,6 +468,13 @@ class MemoryStatement {
       return image && submission?.status === expectedStatus &&
         (!this.sql.includes("s.expires_at > ?") || submission.expires_at > now)
         ? { object_key: image.object_key, content_type: image.content_type }
+        : null;
+    }
+    if (this.sql.startsWith("SELECT i.submission_id, i.object_key")) {
+      const image = images.get(this.values[0]);
+      const submission = image && submissions.get(image.submission_id);
+      return image && submission?.status === "approved"
+        ? { submission_id: image.submission_id, object_key: image.object_key }
         : null;
     }
     throw new Error(`Unexpected first query: ${this.sql}`);
@@ -376,6 +508,19 @@ class MemoryStatement {
         const submission = submissions.get(image.submission_id);
         if (!submission || submission.status !== "approved" || (artifactId && submission.artifact_id !== artifactId)) return [];
         return [{ id: image.id, filename: image.filename, artifact_id: submission.artifact_id, caption: submission.caption }];
+      }) };
+    }
+    if (this.sql.startsWith("SELECT i.id, i.filename, s.artifact_id AS artifactId")) {
+      return { results: [...images.values()].flatMap((image) => {
+        const submission = submissions.get(image.submission_id);
+        if (!submission || submission.status !== "approved") return [];
+        return [{
+          id: image.id,
+          filename: image.filename,
+          artifactId: submission.artifact_id,
+          artifactName: submission.artifact_name,
+          artifactCategory: submission.artifact_category
+        }];
       }) };
     }
     if (this.sql.startsWith("SELECT object_key FROM submission_images")) {

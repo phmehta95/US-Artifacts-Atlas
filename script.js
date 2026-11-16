@@ -487,7 +487,9 @@ async function sendImageSubmission(files, artifact, caption, captionInput, fileI
     captionInput.value = "";
     clearSelectedFiles();
     fileInput.value = "";
-    uploadStatus.textContent = "Your submission has been saved privately for review. It will remain hidden from the site until approved.";
+    uploadStatus.textContent = result.notificationSent
+      ? "Your submission has been saved privately for review. It will remain hidden from the site until approved. An email notification was sent."
+      : "Your submission has been saved privately for review. It will remain hidden from the site until approved, but the email notification could not be sent.";
   } catch (error) {
     uploadStatus.textContent = `Could not save the review submission: ${error.message}`;
   } finally {

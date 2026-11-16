@@ -24,6 +24,12 @@ export default {
     if (url.pathname === "/api/reviewer/queue") {
       return handleReviewerQueue(request, env);
     }
+    if (url.pathname === "/api/reviewer/gallery") {
+      return handleReviewerGallery(request, env);
+    }
+    if (url.pathname.startsWith("/api/reviewer/gallery/")) {
+      return handleReviewerGalleryImageDelete(request, env, url.pathname.slice("/api/reviewer/gallery/".length));
+    }
     if (url.pathname === "/api/reviewer/decision") {
       return handleReviewerDecision(request, env);
     }
@@ -167,7 +173,44 @@ async function handleSubmission(request, env) {
     return jsonResponse({ error: "Could not store this submission for review. Please try again later." }, 502);
   }
 
-  return jsonResponse({ accepted: true }, 200);
+  const notificationSent = await sendSubmissionNotification(env, request, {
+    artifactName,
+    artifactCategory,
+    imageCount: images.length
+  });
+  return jsonResponse({ accepted: true, notificationSent }, 200);
+}
+
+async function sendSubmissionNotification(env, request, submission) {
+  if (typeof env.RESEND_API_KEY !== "string" || !env.RESEND_API_KEY.trim()) {
+    console.error("Image submission notification was not sent because RESEND_API_KEY is not configured.");
+    return false;
+  }
+
+  const reviewUrl = new URL("/review.html", request.url).toString();
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        from: "Ultrasound Artifact Atlas <onboarding@resend.dev>",
+        to: ["pruthvi.mehta@nhs.net"],
+        subject: "New ultrasound image submission awaiting review",
+        text: `A new image submission is awaiting review.\n\nArtifact: ${submission.artifactName}\nCategory: ${submission.artifactCategory}\nImages: ${submission.imageCount}\n\nReview the submission privately: ${reviewUrl}\n\nThe image remains hidden from the public gallery until approved.`
+      })
+    });
+    if (!response.ok) {
+      console.error("Resend could not send an image submission notification.", response.status);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Could not send an image submission notification through Resend.", error);
+    return false;
+  }
 }
 
 async function handleReviewerLogin(request, env) {
@@ -279,6 +322,94 @@ async function handleReviewerQueue(request, env) {
     console.error("Could not load pending image submissions.", error);
     return jsonResponse({ error: "Could not load pending submissions right now." }, 503);
   }
+}
+
+async function handleReviewerGallery(request, env) {
+  if (request.method !== "GET") {
+    return jsonResponse({ error: "Method not allowed." }, 405, { Allow: "GET" });
+  }
+  const authResponse = await requireReviewerSession(request, env);
+  if (authResponse) return authResponse;
+  if (!env.DB) return jsonResponse({ error: "Image review storage is not configured yet." }, 503);
+
+  try {
+    const result = await env.DB.prepare(
+      `SELECT i.id, i.filename, s.artifact_id AS artifactId,
+              s.artifact_name AS artifactName, s.artifact_category AS artifactCategory
+       FROM submission_images i
+       JOIN submissions s ON s.id = i.submission_id
+       WHERE s.status = 'approved'
+       ORDER BY s.reviewed_at DESC, i.id ASC`
+    ).all();
+    return jsonResponse({ images: result.results || [] });
+  } catch (error) {
+    console.error("Could not load approved reviewer gallery images.", error);
+    return jsonResponse({ error: "Could not load approved gallery images right now." }, 503);
+  }
+}
+
+async function handleReviewerGalleryImageDelete(request, env, imageId) {
+  if (request.method !== "DELETE") {
+    return jsonResponse({ error: "Method not allowed." }, 405, { Allow: "DELETE" });
+  }
+  if (!isSameOrigin(request)) {
+    return jsonResponse({ error: "Image deletion origin is not allowed." }, 403);
+  }
+  const authResponse = await requireReviewerSession(request, env);
+  if (authResponse) return authResponse;
+  const unavailable = requireStorageAndRateLimit(env);
+  if (unavailable) return unavailable;
+  const limitResponse = await enforceRateLimit(request, env);
+  if (limitResponse) return limitResponse;
+  if (!/^[0-9a-f-]{36}$/i.test(imageId)) {
+    return jsonResponse({ error: "Image not found." }, 404);
+  }
+
+  let image;
+  try {
+    image = await env.DB.prepare(
+      `SELECT i.submission_id, i.object_key
+       FROM submission_images i
+       JOIN submissions s ON s.id = i.submission_id
+       WHERE i.id = ? AND s.status = 'approved'`
+    ).bind(imageId).first();
+  } catch (error) {
+    console.error("Could not check an approved gallery image before deletion.", error);
+    return jsonResponse({ error: "Could not delete this image right now." }, 503);
+  }
+  if (!image) return jsonResponse({ error: "Approved gallery image not found." }, 404);
+
+  try {
+    const results = await env.DB.batch([
+      env.DB.prepare(
+        `DELETE FROM submission_images
+         WHERE id = ? AND submission_id = ?
+           AND EXISTS (SELECT 1 FROM submissions WHERE id = ? AND status = 'approved')`
+      ).bind(imageId, image.submission_id, image.submission_id),
+      env.DB.prepare(
+        `DELETE FROM submissions
+         WHERE id = ? AND status = 'approved'
+           AND NOT EXISTS (SELECT 1 FROM submission_images WHERE submission_id = ?)`
+      ).bind(image.submission_id, image.submission_id)
+    ]);
+    if (results[0]?.meta?.changes !== 1) {
+      return jsonResponse({ error: "This gallery image has already been deleted." }, 409);
+    }
+  } catch (error) {
+    console.error("Could not remove approved image metadata from the gallery.", error);
+    return jsonResponse({ error: "Could not delete this image right now." }, 503);
+  }
+
+  try {
+    await env.SUBMISSION_IMAGES.delete(image.object_key);
+  } catch (error) {
+    console.error("An approved image was removed from the gallery but its R2 object could not be deleted.", imageId, error);
+    return jsonResponse({
+      deletedFromGallery: true,
+      message: "Image removed from the public gallery, but its private file could not be deleted. Contact the site administrator."
+    });
+  }
+  return jsonResponse({ deletedFromGallery: true, message: "Image deleted from the gallery and private storage." });
 }
 
 async function handleReviewerImage(request, env, imageId) {
