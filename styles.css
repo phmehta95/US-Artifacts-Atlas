@@ -122,6 +122,28 @@ main {
   margin: 0 auto;
 }
 
+.beta-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 11px 15px;
+  border: 1px solid #8bb8d9;
+  border-left: 4px solid var(--nhs-blue);
+  border-radius: 4px;
+  background: #eaf3f8;
+}
+
+.beta-notice strong {
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--nhs-blue);
+  color: #fff;
+  font-size: 13px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
 .breadcrumbs {
   display: flex;
   gap: 10px;
@@ -674,6 +696,10 @@ h1 {
   border-left-color: #00a499;
 }
 
+.reduce-card {
+  grid-column: 1 / -1;
+}
+
 .education-note {
   display: flex;
   gap: 13px;
@@ -942,6 +968,10 @@ footer {
 
   .image-actions,
   .image-gallery {
+    grid-column: auto;
+  }
+
+  .reduce-card {
     grid-column: auto;
   }
 

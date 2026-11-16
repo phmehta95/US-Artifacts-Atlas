@@ -376,8 +376,8 @@ function renderArtifact() {
             <button id="upload-image-button" class="upload-button" type="button">Submit for review</button>
           </div>
           <a id="gallery-link" class="gallery-link" href="#artifact-image-gallery" hidden>View image gallery</a>
-          <p class="upload-instructions">Choose up to 5 de-identified JPEG, PNG or WebP images (6 MB combined), add an optional caption, then submit them for review.</p>
-          <p class="local-storage-note">Submissions are stored privately and remain hidden from the gallery until approved by the Barts Ultrasound Physics team.</p>
+          <p class="upload-instructions">Choose up to 5 JPEG, PNG or WebP images (6 MB combined), add an optional caption, then submit them for review. Remember to ensure that patient information is completely removed from all uploaded images.</p>
+          <p class="local-storage-note">Submissions are stored privately and only appear in the gallery after approval by the Barts Ultrasound Physics team.</p>
           <p id="image-upload-status" class="upload-status" role="status" aria-live="polite"></p>
         </div>
       </section>
